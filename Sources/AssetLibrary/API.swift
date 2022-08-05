@@ -8,11 +8,18 @@ public protocol AssetLibrary {
 
   // MARK: - Operation
 
-  /// Adds the specified asset to the library.
+  /**
+   Returns a directory file wrapper representing the current contents of the library, for
+   persistence on disk.
+
+   The library can later be faithfully restored by calling the factory method
+   `loadAssetLibrary(from:)` and passing the same directory wrapper returned here.
+   */
+  func directoryWrapper() -> FileWrapper
+
+  /** Adds the specified asset to the library. */
   func addAsset<T: Asset>(_ asset: T)
 
-  /// Retrieves all assets of the specified type.
+  /** Retrieves all assets of the specified type. */
   func assets<T: Asset>(ofType: T.Type) -> [T]
-
-
 }
