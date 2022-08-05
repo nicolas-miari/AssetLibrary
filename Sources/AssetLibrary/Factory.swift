@@ -10,14 +10,14 @@ public class AssetLibraryFactory {
   /**
    Instantiates an empty asset library.
    */
-  static func newLibrary() -> some AssetLibrary {
+  public static func newLibrary() -> some AssetLibrary {
     return AssetLibraryImplementation()
   }
 
   /**
    Instantiates a new asset library with the contents of the specified directory.
    */
-  static func loadAssetLibrary(from directory: FileWrapper) throws -> some AssetLibrary {
+  public static func loadAssetLibrary(from directory: FileWrapper) throws -> some AssetLibrary {
     let library = AssetLibraryImplementation()
     try library.loadContents(from: directory)
     return library
