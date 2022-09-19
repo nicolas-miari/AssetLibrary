@@ -15,7 +15,7 @@ public protocol AssetLibrary {
    The library can later be faithfully restored by calling the factory method
    `loadAssetLibrary(from:)` and passing the same directory wrapper returned here.
    */
-  func directoryWrapper() -> FileWrapper
+  func directoryWrapper() throws -> FileWrapper
 
   /** Adds the specified asset to the library. */
   func addAsset<T: Asset>(_ asset: T)

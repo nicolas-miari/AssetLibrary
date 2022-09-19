@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nicolas-miari/Asset.git",
       "state" : {
-        "revision" : "016b9d7346573cf4ca688610a159f136f7c7fc8a",
-        "version" : "0.0.0"
+        "revision" : "d64a66fa0caab0e26b66cb24e10f88e2fd89daa8",
+        "version" : "1.0.0"
       }
     }
   ],

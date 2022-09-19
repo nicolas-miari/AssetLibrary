@@ -5,38 +5,56 @@ internal class AssetLibraryImplementation: AssetLibrary {
 
   // MARK: - Operation
 
-  func directoryWrapper() -> FileWrapper {
-    // TODO: Implement
-    return FileWrapper(directoryWithFileWrappers: [:])
+  func directoryWrapper() throws -> FileWrapper {
+    let subdirectories = try assetsByClassName.mapValues { assets in
+      // Map assets to files
+      let filesByIdentifier = try assets.mapValues { asset in
+        let data = try JSONEncoder().encode(asset)
+        return FileWrapper(regularFileWithContents: data)
+      }
+      // Group assset files in a directory
+      return FileWrapper(directoryWithFileWrappers: filesByIdentifier)
+    }
+    return FileWrapper(directoryWithFileWrappers: subdirectories)
   }
 
-  func addAsset<T>(_ asset: T) where T : Asset {
-    assets.append(asset)
+  func loadAssets<T: Asset>(ofType: T.Type, fromRoot directory: FileWrapper) throws {
+    let key = self.key(for: T.self)
+    guard let subdirectory = directory.fileWrappers?[key], let files = subdirectory.fileWrappers else {
+      return
+    }
+    let assetsByIdentifier = try files.mapValues { file in
+      let data = file.regularFileContents ?? Data()
+      return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    assetsByClassName[key] = assetsByIdentifier
   }
 
-  func assets<T>(ofType: T.Type) -> [T] where T : Asset {
-    return assets.compactMap { $0 as? T }
+  func addAsset<T: Asset>(_ asset: T) {
+    let key = self.key(for: T.self)
+    var assets = assetsByClassName[key] ?? [:]
+    assets[asset.identifier] = asset
+    assetsByClassName[key] = assets
+  }
+
+  func assets<T: Asset>(ofType: T.Type) -> [T] {
+    let key = self.key(for: T.self)
+    let assets = assetsByClassName[key]
+    guard let values = assets?.values else {
+      return []
+    }
+    return Array(values) as? [T] ?? []
   }
 
   // MARK: - Private Implementation
 
-  private var assets: [any Asset] = []
+  private var assetsByClassName: [String: [String: any Asset]] = [:]
 
-  func loadContents(from directory: FileWrapper) throws {
-    /*
-     TODO: Implement
-
-     Each subdirectory holds the assets for a given type.
-     Determine the type of each subdirectory, and decode each of its regular files into the
-     appropriate type.
-     */
-  }
-
-  
-  func registerAssetDecoder<T: Asset&Decodable>(for type: T.Type) {
-    let decoder: (Data) throws -> T = { (data) throws -> T in
-      let asset = try JSONDecoder().decode(T.self, from: data)
-      return asset
-    }
+  private func key<T: Asset>(for type: T.Type) -> String {
+    let bundle = Bundle(for: T.self)
+    let namespace = (bundle.infoDictionary?["CFBundleName"] as? String ?? "").replacingOccurrences(of: " ", with: "_")
+    let typeName = String(describing: T.self)
+    return "\(namespace).\(typeName)"
   }
 }

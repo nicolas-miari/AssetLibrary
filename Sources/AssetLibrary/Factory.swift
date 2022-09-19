@@ -1,4 +1,5 @@
 import Foundation
+import Asset
 
 /**
  The purpose of the factory is to hide the concrete implementation of the AssetLibrary protocol.
@@ -16,10 +17,15 @@ public class AssetLibraryFactory {
 
   /**
    Instantiates a new asset library with the contents of the specified directory.
+
+   The array of metatypes is necessary in order to instantiate each concrete asset type from the
+   persisted data.
    */
-  public static func loadAssetLibrary(from directory: FileWrapper) throws -> some AssetLibrary {
+  public static func loadAssetLibrary(from directory: FileWrapper, assetTypes: [Asset.Type]) throws -> some AssetLibrary {
     let library = AssetLibraryImplementation()
-    try library.loadContents(from: directory)
+    try assetTypes.forEach { type in
+      try library.loadAssets(ofType: type, fromRoot: directory)
+    }
     return library
   }
 }
